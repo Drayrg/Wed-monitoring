@@ -11,7 +11,7 @@ import Sidebar from "@/components/Sidebar";
 
 function Router() {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row bg-black">
       <Sidebar />
       <Switch>
         <Route path="/" component={DashboardPage} />

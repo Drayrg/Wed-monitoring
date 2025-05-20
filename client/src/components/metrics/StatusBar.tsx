@@ -3,10 +3,15 @@ import { cn } from "@/lib/utils";
 interface StatusBarProps {
   value: number;
   colorVariant?: "good" | "warning" | "critical";
+  color?: "primary" | "secondary" | "accent";
 }
 
-export const StatusBar = ({ value, colorVariant }: StatusBarProps) => {
+export const StatusBar = ({ value, colorVariant, color }: StatusBarProps) => {
   const getStatusColor = () => {
+    if (color) {
+      return `bg-${color}`;
+    }
+    
     if (colorVariant) {
       return `bg-status-${colorVariant}`;
     }

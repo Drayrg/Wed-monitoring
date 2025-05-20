@@ -31,11 +31,11 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-full md:w-64 md:min-h-screen bg-background-card border-r border-gray-800">
+    <aside className="w-full md:w-64 md:min-h-screen bg-black border-r border-gray-800">
       <div className="p-4 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-foreground flex items-center">
-          <LayoutDashboard className="mr-2 h-6 w-6" />
-          System Monitor
+          <LayoutDashboard className="mr-2 h-6 w-6 text-primary" />
+          <span className="text-white">SystemPulse</span>
         </h1>
         <Button
           variant="ghost"
@@ -53,14 +53,14 @@ const Sidebar = () => {
             {navigationItems.map((item) => (
               <li key={item.path} className="mb-1">
                 <Link href={item.path}>
-                  <a
-                    className={`sidebar-link flex items-center p-3 text-foreground rounded hover:bg-background-hover ${
-                      location === item.path ? "active" : ""
+                  <button
+                    className={`sidebar-link flex items-center p-3 w-full text-left text-gray-300 rounded hover:bg-gray-800 ${
+                      location === item.path ? "active bg-gray-800 text-white" : ""
                     }`}
                   >
                     {item.icon}
                     {item.name}
-                  </a>
+                  </button>
                 </Link>
               </li>
             ))}
