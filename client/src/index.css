@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 7%;
+  --background-card: 0 0% 12%;
+  --background-hover: 0 0% 16%;
+  --foreground: 0 0% 98%;
+  --muted: 240 5% 64.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 98%;
+  --card: 0 0% 12%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 250 95% 64%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 142 71% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 24 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 250 95% 64%;
+  --radius: 0.5rem;
+  --status-good: 142 71% 45%;
+  --status-warning: 24 100% 50%;
+  --status-critical: 0 84% 60%;
+  --sidebar-background: 0 0% 12%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 250 95% 64%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 24 100% 50%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 250 95% 64%;
+  --chart-1: 250 95% 64%;
+  --chart-2: 142 71% 45%;
+  --chart-3: 24 100% 50%;
+  --chart-4: 0 84% 60%;
+  --chart-5: 199 89% 48%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.sidebar-link.active {
+  @apply bg-primary/10 border-l-2 border-primary;
+}
+
+.status-bar {
+  @apply h-2 w-full bg-gray-800 rounded-full overflow-hidden;
+}
+
+.status-bar-fill {
+  @apply h-full rounded-full transition-all duration-500;
+}
