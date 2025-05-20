@@ -7,18 +7,39 @@ interface StatusBarProps {
 }
 
 export const StatusBar = ({ value, colorVariant, color }: StatusBarProps) => {
+  // Ensure value is between 0 and 100
+  const safeValue = Math.max(0, Math.min(100, value));
+  
   const getStatusColor = () => {
     if (color) {
-      return `bg-${color}`;
+      switch (color) {
+        case "primary":
+          return "bg-primary";
+        case "secondary":
+          return "bg-secondary";
+        case "accent":
+          return "bg-accent";
+        default:
+          return "bg-primary";
+      }
     }
     
     if (colorVariant) {
-      return `bg-status-${colorVariant}`;
+      switch (colorVariant) {
+        case "good":
+          return "bg-status-good";
+        case "warning":
+          return "bg-status-warning";
+        case "critical":
+          return "bg-status-critical";
+        default:
+          return "bg-status-good";
+      }
     }
 
-    if (value > 80) {
+    if (safeValue > 80) {
       return "bg-status-critical";
-    } else if (value > 60) {
+    } else if (safeValue > 60) {
       return "bg-status-warning";
     } else {
       return "bg-status-good";
@@ -26,10 +47,10 @@ export const StatusBar = ({ value, colorVariant, color }: StatusBarProps) => {
   };
 
   return (
-    <div className="status-bar">
+    <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
       <div
-        className={cn("status-bar-fill", getStatusColor())}
-        style={{ width: `${value}%` }}
+        className={cn("h-full rounded-full", getStatusColor())}
+        style={{ width: `${safeValue}%` }}
       />
     </div>
   );

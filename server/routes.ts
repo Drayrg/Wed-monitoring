@@ -73,61 +73,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // System metrics endpoint
   app.get("/api/metrics", async (req, res) => {
     try {
-      // For demo, we'll still generate metrics but also store them in the database
-      const metricsData = generateSystemMetrics();
-      
       // Check if we have a system profile
       const profiles = await storage.getSystemProfiles(1);
       if (profiles.length === 0) {
-        return res.json(metricsData);
+        return res.status(404).json({ error: "No system profile found. Please initialize the system first." });
       }
       
       const profileId = profiles[0].id;
       
+      // Get the latest metrics from the database
+      const cpuMetric = await storage.getLatestCpuMetric(profileId);
+      const memoryMetric = await storage.getLatestMemoryMetric(profileId);
+      const batteryMetric = await storage.getLatestBatteryMetric(profileId);
+      const networkMetric = await storage.getLatestNetworkMetric(profileId);
+      
+      // If we have recent metrics (less than 10 seconds old), use them
+      const now = new Date();
+      const tenSecondsAgo = new Date(now.getTime() - 10000);
+      
+      if (
+        cpuMetric && 
+        memoryMetric && 
+        batteryMetric && 
+        networkMetric && 
+        new Date(cpuMetric.timestamp) > tenSecondsAgo
+      ) {
+        const metricsData = {
+          cpu: {
+            usage: cpuMetric.usage,
+            cores: cpuMetric.cores,
+            threads: cpuMetric.threads,
+            speed: cpuMetric.speed
+          },
+          memory: {
+            usedPercentage: memoryMetric.usedPercentage,
+            used: memoryMetric.used,
+            total: memoryMetric.total
+          },
+          battery: {
+            level: batteryMetric.level,
+            status: batteryMetric.status,
+            timeRemaining: batteryMetric.timeRemaining || "Unknown"
+          },
+          network: {
+            status: networkMetric.status as "Online" | "Offline",
+            download: networkMetric.download,
+            upload: networkMetric.upload,
+            ip: networkMetric.ip
+          }
+        };
+        
+        return res.json(metricsData);
+      }
+      
+      // If we don't have recent metrics, return an error message prompting to send data
+      res.status(404).json({ 
+        error: "No recent metrics available", 
+        message: "Please use the Python client to send system metrics data" 
+      });
+    } catch (error) {
+      console.error("Error fetching metrics:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch metrics", 
+        message: "Please ensure the Python client is running and sending data" 
+      });
+    }
+  });
+  
+  // Endpoint for receiving metrics from Python desktop client
+  app.post("/api/metrics", async (req, res) => {
+    try {
+      const { 
+        cpu, 
+        memory, 
+        battery, 
+        network, 
+        profileId = DEFAULT_PROFILE_ID 
+      } = req.body;
+      
+      if (!cpu || !memory) {
+        return res.status(400).json({ error: "CPU and memory metrics are required" });
+      }
+      
+      // Validate CPU data
+      if (!cpu.usage || !cpu.cores || !cpu.threads || !cpu.speed) {
+        return res.status(400).json({ error: "Invalid CPU data format" });
+      }
+      
+      // Validate memory data
+      if (!memory.usedPercentage || !memory.used || !memory.total) {
+        return res.status(400).json({ error: "Invalid memory data format" });
+      }
+      
       // Store the CPU metrics
       await storage.createCpuMetric({
         profileId,
-        usage: metricsData.cpu.usage,
-        cores: metricsData.cpu.cores,
-        threads: metricsData.cpu.threads,
-        speed: metricsData.cpu.speed,
-        model: "Sample CPU Model"
+        usage: cpu.usage,
+        cores: cpu.cores,
+        threads: cpu.threads,
+        speed: cpu.speed,
+        model: cpu.model || "CPU"
       });
       
       // Store the memory metrics
       await storage.createMemoryMetric({
         profileId,
-        usedPercentage: metricsData.memory.usedPercentage,
-        used: metricsData.memory.used,
-        total: metricsData.memory.total
+        usedPercentage: memory.usedPercentage,
+        used: memory.used,
+        total: memory.total
       });
       
-      // Store the battery metrics
-      await storage.createBatteryMetric({
-        profileId,
-        level: metricsData.battery.level,
-        status: metricsData.battery.status,
-        timeRemaining: metricsData.battery.timeRemaining
-      });
+      // Store the battery metrics if available
+      if (battery) {
+        await storage.createBatteryMetric({
+          profileId,
+          level: battery.level,
+          status: battery.status,
+          timeRemaining: battery.timeRemaining
+        });
+      }
       
-      // Store the network metrics
-      await storage.createNetworkMetric({
-        profileId,
-        status: metricsData.network.status,
-        download: metricsData.network.download,
-        upload: metricsData.network.upload,
-        ip: metricsData.network.ip,
-        interfaces: null // We'll add proper interfaces data later
-      });
+      // Store the network metrics if available
+      if (network) {
+        await storage.createNetworkMetric({
+          profileId,
+          status: network.status,
+          download: network.download,
+          upload: network.upload,
+          ip: network.ip,
+          interfaces: network.interfaces || null
+        });
+      }
       
-      res.json(metricsData);
+      res.json({ success: true, message: "Metrics saved successfully" });
     } catch (error) {
-      console.error("Error fetching metrics:", error);
-      
-      // If there's an error with the database, still return generated metrics
-      // so the UI doesn't break
-      const fallbackMetrics = generateSystemMetrics();
-      res.json(fallbackMetrics);
+      console.error("Error saving metrics:", error);
+      res.status(500).json({ error: "Failed to save metrics" });
     }
   });
 
