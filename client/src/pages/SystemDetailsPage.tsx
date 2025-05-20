@@ -7,15 +7,72 @@ import HardwareTab from "@/components/system-details/HardwareTab";
 import OSTab from "@/components/system-details/OSTab";
 import StorageTab from "@/components/system-details/StorageTab";
 import NetworkTab from "@/components/system-details/NetworkTab";
+import { AlertTriangle } from "lucide-react";
+
+// Интерфейсы для данных от сервера
+interface SystemDetails {
+  profile: {
+    name: string;
+    hostname: string;
+    os: {
+      name: string;
+      version: string;
+      arch: string;
+    };
+    lastUpdated: string;
+  };
+  hardware: {
+    cpu: {
+      model: string;
+      cores: number;
+      threads: number;
+      speed: string;
+      usage: number;
+    } | null;
+    memory: {
+      total: string;
+      used: string;
+      usedPercentage: number;
+    } | null;
+    battery: {
+      level: number;
+      status: string;
+      timeRemaining: string;
+    } | null;
+  };
+  network: {
+    status: string;
+    download: string;
+    upload: string;
+    ip: string;
+    interfaces: any;
+  } | null;
+  storage: {
+    devices: Array<{
+      name: string;
+      type: string;
+      totalSpace: string;
+      usedSpace: string;
+      usedPercentage: number;
+    }>;
+  } | null;
+}
 
 const SystemDetailsPage = () => {
   const [activeTab, setActiveTab] = useState("hardware");
   const { interval } = useUpdateInterval();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const { data: systemDetails, isLoading, refetch } = useQuery({
+  const { 
+    data: systemDetails, 
+    isLoading, 
+    refetch,
+    isError,
+    error
+  } = useQuery({
     queryKey: ["/api/system"],
-    // Здесь мы получаем данные о системе с сервера
-    // В реальном приложении endpoint API должен возвращать системную информацию
+    refetchOnWindowFocus: false,
+    retry: 2
   });
 
   // Обновление данных с заданным интервалом
@@ -27,83 +84,148 @@ const SystemDetailsPage = () => {
     return () => clearInterval(intervalId);
   }, [refetch, interval]);
 
-  // Пример данных для разных вкладок (в реальном приложении данные будут приходить с сервера)
-  const hardwareData = {
-    cpuInfo: {
-      model: "Standard CPU",
-      cores: 4,
-      currentUsage: 15.5
-    },
-    memoryInfo: {
-      total: "16 GB",
-      free: "14.36 GB",
-      usedPercentage: 61, 
-      usedGb: "8.2 GB",
-      totalGb: "16 GB"
-    },
-    batteryInfo: {
-      level: 90,
-      status: "Charging",
-      timeRemaining: "154 minutes"
-    }
-  };
-
-  const osData = {
-    osInfo: {
-      name: "Linux",
-      version: "5.15.0",
-      architecture: "x86_64",
-      kernel: "5.15.0-generic",
-      hostname: "system-pulse",
-      uptime: "3 days, 7 hours",
-      lastBoot: "2023-10-25 08:30:15"
-    }
-  };
-
-  const storageData = {
-    storageDevices: [
-      {
-        name: "System Drive",
-        type: "SSD",
-        totalSpace: "256.0 GB Total",
-        usedSpace: "107.55 GB Used",
-        usedPercentage: 42
-      },
-      {
-        name: "Data Drive",
-        type: "HDD / 7200 RPM",
-        totalSpace: "1000.0 GB Total",
-        usedSpace: "842.85 GB Used",
-        usedPercentage: 84
+  // Обработка ошибок
+  useEffect(() => {
+    if (isError) {
+      const err = error as any;
+      if (err.response?.data?.message) {
+        setErrorMessage(err.response.data.message);
+      } else if (err.message) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("Не удалось получить данные о системе");
       }
-    ]
+    } else {
+      setErrorMessage(null);
+    }
+  }, [isError, error]);
+
+  // Преобразование данных API в формат для компонентов вкладок
+  const getHardwareData = () => {
+    const defaultData = {
+      cpuInfo: {
+        model: "Н/Д",
+        cores: 0,
+        currentUsage: 0
+      },
+      memoryInfo: {
+        total: "Н/Д",
+        free: "Н/Д",
+        usedPercentage: 0,
+        usedGb: "0 GB",
+        totalGb: "0 GB"
+      },
+      batteryInfo: {
+        level: 0,
+        status: "Н/Д",
+        timeRemaining: "Н/Д"
+      }
+    };
+
+    if (!systemDetails?.hardware) return defaultData;
+
+    return {
+      cpuInfo: {
+        model: systemDetails.hardware.cpu?.model || "Н/Д",
+        cores: systemDetails.hardware.cpu?.cores || 0,
+        currentUsage: systemDetails.hardware.cpu?.usage || 0
+      },
+      memoryInfo: {
+        total: systemDetails.hardware.memory?.total || "Н/Д",
+        free: "Н/Д", // Рассчитываем на основе имеющихся данных
+        usedPercentage: systemDetails.hardware.memory?.usedPercentage || 0,
+        usedGb: systemDetails.hardware.memory?.used || "0 GB",
+        totalGb: systemDetails.hardware.memory?.total || "0 GB"
+      },
+      batteryInfo: {
+        level: systemDetails.hardware.battery?.level || 0,
+        status: systemDetails.hardware.battery?.status || "Н/Д",
+        timeRemaining: systemDetails.hardware.battery?.timeRemaining || "Н/Д"
+      }
+    };
   };
 
-  const networkData = {
-    networkInterfaces: [
-      {
-        name: "eth0",
-        ipAddress: "192.168.1.50",
-        macAddress: "00:1B:44:11:3A:B7",
-        speed: "1000 Mbps",
-        status: "connected",
-        dataTransferred: {
-          download: "1,397.67 KB",
-          upload: "315.64 KB"
-        }
-      },
-      {
-        name: "wlan0",
-        ipAddress: "192.168.1.51",
-        macAddress: "00:1B:44:11:3A:B8",
-        speed: "0 Mbps",
-        status: "disconnected",
-        dataTransferred: {
-          download: "0 KB",
-          upload: "0 KB"
-        }
+  const getOsData = () => {
+    const defaultData = {
+      osInfo: {
+        name: "Н/Д",
+        version: "Н/Д",
+        architecture: "Н/Д",
+        kernel: "Н/Д",
+        hostname: "Н/Д",
+        uptime: "Н/Д",
+        lastBoot: "Н/Д"
       }
-    ]
+    };
+
+    if (!systemDetails?.profile) return defaultData;
+
+    return {
+      osInfo: {
+        name: systemDetails.profile.os?.name || "Н/Д",
+        version: systemDetails.profile.os?.version || "Н/Д",
+        architecture: systemDetails.profile.os?.arch || "Н/Д",
+        kernel: systemDetails.profile.os?.version || "Н/Д", // Часто kernel version = OS version
+        hostname: systemDetails.profile.hostname || "Н/Д",
+        uptime: "Информация недоступна",
+        lastBoot: new Date(systemDetails.profile.lastUpdated).toLocaleString() || "Н/Д"
+      }
+    };
+  };
+
+  const getStorageData = () => {
+    const defaultData = {
+      storageDevices: []
+    };
+
+    if (!systemDetails?.storage?.devices || systemDetails.storage.devices.length === 0) {
+      return defaultData;
+    }
+
+    return {
+      storageDevices: systemDetails.storage.devices
+    };
+  };
+
+  const getNetworkData = () => {
+    const defaultData = {
+      networkInterfaces: []
+    };
+
+    if (!systemDetails?.network) return defaultData;
+
+    // Если есть данные о интерфейсах, используем их
+    if (systemDetails.network.interfaces && Array.isArray(systemDetails.network.interfaces)) {
+      return {
+        networkInterfaces: systemDetails.network.interfaces.map(iface => ({
+          ...iface,
+          // Преобразуем статус в требуемый формат (connected/disconnected)
+          status: iface.status === "connected" ? "connected" : "disconnected",
+          // Добавляем информацию о переданных данных
+          dataTransferred: {
+            download: systemDetails.network.download || "0 KB",
+            upload: systemDetails.network.upload || "0 KB"
+          }
+        }))
+      };
+    }
+
+    // Если нет данных о интерфейсах, создаем простую запись
+    return {
+      networkInterfaces: [
+        {
+          name: "default",
+          ipAddress: systemDetails.network.ip || "0.0.0.0",
+          macAddress: "Н/Д",
+          speed: "Н/Д",
+          status: systemDetails.network.status === "Online" ? "connected" : "disconnected",
+          dataTransferred: {
+            download: systemDetails.network.download || "0 KB",
+            upload: systemDetails.network.upload || "0 KB"
+          }
+        }
+      ]
+    };
   };
 
   function renderActiveTab() {
@@ -117,15 +239,15 @@ const SystemDetailsPage = () => {
 
     switch(activeTab) {
       case "hardware":
-        return <HardwareTab {...hardwareData} />;
+        return <HardwareTab {...getHardwareData()} />;
       case "os":
-        return <OSTab {...osData} />;
+        return <OSTab {...getOsData()} />;
       case "storage":
-        return <StorageTab {...storageData} />;
+        return <StorageTab {...getStorageData()} />;
       case "network":
-        return <NetworkTab {...networkData} />;
+        return <NetworkTab {...getNetworkData()} />;
       default:
-        return <HardwareTab {...hardwareData} />;
+        return <HardwareTab {...getHardwareData()} />;
     }
   }
 
@@ -138,6 +260,19 @@ const SystemDetailsPage = () => {
         </div>
         <UpdateIntervalSelect />
       </div>
+
+      {errorMessage && (
+        <div className="bg-red-900/30 border border-red-700 rounded-md p-4 mb-6 text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            <h3 className="font-semibold">Ошибка получения данных</h3>
+          </div>
+          <p className="text-sm">{errorMessage}</p>
+          <p className="text-xs mt-2 text-red-300">
+            Убедитесь, что Python-клиент запущен и отправляет системные данные
+          </p>
+        </div>
+      )}
 
       <SystemDetailsTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       
