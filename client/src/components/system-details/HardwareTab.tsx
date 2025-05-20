@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Cpu, Memory, Battery } from "lucide-react";
+import { Cpu, Database, Battery } from "lucide-react";
 
 interface HardwareTabProps {
   cpuInfo: {
@@ -68,7 +68,7 @@ const HardwareTab = ({ cpuInfo, memoryInfo, batteryInfo }: HardwareTabProps) => 
       <Card className="bg-card border border-border shadow-lg">
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center space-x-2">
-            <Memory className="h-5 w-5 text-secondary" />
+            <Database className="h-5 w-5 text-secondary" />
             <h2 className="text-lg font-semibold text-foreground">Memory Information</h2>
           </div>
           
