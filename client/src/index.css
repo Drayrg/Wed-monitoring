@@ -43,6 +43,45 @@
   --chart-5: 199 89% 30%;
 }
 
+.light-theme {
+  --background: 0 0% 100%;
+  --background-card: 0 0% 95%;
+  --background-hover: 0 0% 90%;
+  --foreground: 0 0% 0%;
+  --muted: 0 0% 40%;
+  --muted-foreground: 0 0% 40%;
+  --popover: 0 0% 95%;
+  --popover-foreground: 0 0% 0%;
+  --card: 0 0% 95%;
+  --card-foreground: 0 0% 0%;
+  --border: 0 0% 85%;
+  --input: 0 0% 85%;
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 140 100% 45%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 280 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 210 100% 50%;
+  --status-good: 140 80% 40%;
+  --status-warning: 35 90% 50%;
+  --status-critical: 0 80% 50%;
+  --sidebar-background: 0 0% 95%;
+  --sidebar-foreground: 0 0% 20%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 280 100% 50%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-border: 0 0% 80%;
+  --chart-1: 210 80% 40%;
+  --chart-2: 140 80% 40%;
+  --chart-3: 280 80% 40%;
+  --chart-4: 0 80% 40%;
+  --chart-5: 199 80% 40%;
+}
+
 @layer base {
   * {
     @apply border-border;
