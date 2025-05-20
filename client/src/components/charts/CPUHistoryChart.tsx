@@ -7,7 +7,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Area,
+  AreaChart
 } from "recharts";
+import { Cpu } from "lucide-react";
 
 interface CPUHistoryChartProps {
   data: Array<{
@@ -18,12 +21,15 @@ interface CPUHistoryChartProps {
 
 const CPUHistoryChart = ({ data }: CPUHistoryChartProps) => {
   return (
-    <Card className="bg-background-card shadow-lg">
+    <Card className="bg-black border border-gray-800 shadow-lg">
       <CardContent className="p-4">
-        <h2 className="font-semibold text-foreground mb-4">CPU Usage History</h2>
+        <div className="flex items-center mb-3">
+          <Cpu className="h-4 w-4 mr-2 text-primary" />
+          <h2 className="font-semibold text-foreground text-sm">CPU Usage History</h2>
+        </div>
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+            <AreaChart
               data={data}
               margin={{
                 top: 5,
@@ -32,35 +38,43 @@ const CPUHistoryChart = ({ data }: CPUHistoryChartProps) => {
                 bottom: 5,
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+              <defs>
+                <linearGradient id="cpuFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#1E40AF" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#1E40AF" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.05)" />
               <XAxis 
                 dataKey="time" 
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
-                stroke="rgba(255, 255, 255, 0.1)"
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
+                stroke="rgba(255, 255, 255, 0.05)"
               />
               <YAxis 
                 domain={[0, 100]}
-                tick={{ fill: "hsl(var(--muted-foreground))" }}
-                stroke="rgba(255, 255, 255, 0.1)"
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
+                stroke="rgba(255, 255, 255, 0.05)"
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: "hsl(var(--background-card))",
-                  border: "1px solid hsl(var(--border))",
-                  color: "hsl(var(--foreground))"
+                  backgroundColor: "#111",
+                  border: "1px solid #333",
+                  color: "#fff",
+                  fontSize: "12px",
+                  borderRadius: "4px"
                 }}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="value"
                 name="CPU Usage %"
-                stroke="hsl(var(--primary))"
-                fill="hsla(var(--primary), 0.2)"
+                stroke="#3b82f6"
+                fill="url(#cpuFill)"
                 strokeWidth={2}
                 dot={false}
-                activeDot={{ r: 6 }}
+                activeDot={{ r: 4, stroke: "#fff", strokeWidth: 1 }}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

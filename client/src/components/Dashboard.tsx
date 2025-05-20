@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CPUCard from "./metrics/CPUCard";
 import MemoryCard from "./metrics/MemoryCard";
@@ -35,10 +35,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="p-5">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground">System Dashboard</h1>
-        <p className="text-muted-foreground">Current system performance metrics</p>
+        <h1 className="text-2xl font-semibold text-white flex items-center">System Dashboard</h1>
+        <p className="text-xs text-gray-400 mt-1">Updating every 3s</p>
       </div>
 
       {/* System Metrics Cards */}
@@ -68,9 +68,13 @@ const Dashboard = () => {
       </div>
 
       {/* Historical Data Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <CPUHistoryChart data={historicalData.cpu} />
         <MemoryHistoryChart data={historicalData.memory} />
+      </div>
+      
+      {/* Network Traffic Chart (Full Width) */}
+      <div className="w-full">
         <NetworkTrafficChart data={historicalData.network} />
       </div>
     </div>
