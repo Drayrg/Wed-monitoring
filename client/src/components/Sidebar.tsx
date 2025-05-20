@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, LayoutDashboard, List, Computer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ThemeToggle from "@/components/controls/ThemeToggle";
 
 const Sidebar = () => {
   const [location] = useLocation();
@@ -31,20 +32,23 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-full md:w-64 md:min-h-screen bg-black border-r border-gray-800">
+    <aside className="w-full md:w-64 md:min-h-screen bg-sidebar-background border-r border-sidebar-border">
       <div className="p-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground flex items-center">
+        <h1 className="text-xl font-semibold text-sidebar-foreground flex items-center">
           <LayoutDashboard className="mr-2 h-6 w-6 text-primary" />
-          <span className="text-white">SystemPulse</span>
+          <span>SystemPulse</span>
         </h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="md:hidden"
-        >
-          <Menu className="h-6 w-6" />
-        </Button>
+        <div className="flex items-center">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="md:hidden ml-2"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className={`p-2 ${isOpen ? 'block' : 'hidden'} md:block`}>
@@ -54,8 +58,8 @@ const Sidebar = () => {
               <li key={item.path} className="mb-1">
                 <Link href={item.path}>
                   <button
-                    className={`sidebar-link flex items-center p-3 w-full text-left text-gray-300 rounded hover:bg-gray-800 ${
-                      location === item.path ? "active bg-gray-800 text-white" : ""
+                    className={`sidebar-link flex items-center p-3 w-full text-left text-sidebar-foreground rounded hover:bg-sidebar-primary/10 ${
+                      location === item.path ? "active bg-sidebar-primary/20 text-sidebar-foreground font-medium" : ""
                     }`}
                   >
                     {item.icon}

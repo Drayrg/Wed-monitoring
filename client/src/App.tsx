@@ -8,10 +8,12 @@ import DashboardPage from "@/pages/DashboardPage";
 import ProcessesPage from "@/pages/ProcessesPage";
 import SystemDetailsPage from "@/pages/SystemDetailsPage";
 import Sidebar from "@/components/Sidebar";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { UpdateIntervalProvider } from "@/context/UpdateIntervalContext";
 
 function Router() {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-black">
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
       <Sidebar />
       <Switch>
         <Route path="/" component={DashboardPage} />
@@ -26,10 +28,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ThemeProvider>
+        <UpdateIntervalProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </UpdateIntervalProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
